@@ -1,0 +1,2 @@
+# Visualize_Data_webAPP
+GASを通して，Google Spreadsheetsのデータを可視化してくれるWebアプリ
