@@ -36,11 +36,10 @@ export const MapContainer: React.FC = () => {
           lat: latestPoint.latitude,
           lng: latestPoint.longitude,
         };
-        setMapCenter(center);
         map.panTo(center);
       }
     }
-  }, [selectedVehicleId, map, getLatestDataPoint, setMapCenter]);
+  }, [selectedVehicleId, map, getLatestDataPoint]);
 
   // Auto-center on first vehicle when data loads
   useEffect(() => {
@@ -52,11 +51,10 @@ export const MapContainer: React.FC = () => {
           lat: latestPoint.latitude,
           lng: latestPoint.longitude,
         };
-        setMapCenter(center);
         map.panTo(center);
       }
     }
-  }, [vehicleTracks, selectedVehicleId, map, getLatestDataPoint, setMapCenter]);
+  }, [vehicleTracks, selectedVehicleId, map, getLatestDataPoint]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -66,23 +64,6 @@ export const MapContainer: React.FC = () => {
     setMap(null);
   }, []);
 
-  const onCenterChanged = useCallback(() => {
-    if (map) {
-      const center = map.getCenter();
-      if (center) {
-        setMapCenter({ lat: center.lat(), lng: center.lng() });
-      }
-    }
-  }, [map, setMapCenter]);
-
-  const onZoomChanged = useCallback(() => {
-    if (map) {
-      const zoom = map.getZoom();
-      if (zoom !== undefined) {
-        setMapZoom(zoom);
-      }
-    }
-  }, [map, setMapZoom]);
 
   if (loadError) {
     return (
@@ -119,8 +100,6 @@ export const MapContainer: React.FC = () => {
         zoom={mapZoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
-        onCenterChanged={onCenterChanged}
-        onZoomChanged={onZoomChanged}
         options={DEFAULT_MAP_OPTIONS}
       >
         {/* Render polylines for all vehicles */}
