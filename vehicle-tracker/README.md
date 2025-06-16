@@ -1,163 +1,303 @@
 # Vehicle Tracker Web App
 
-A real-time vehicle tracking web application built with React, TypeScript, and Google Maps. Reads sensor telemetry data from a Google Apps Script endpoint and displays it on an interactive map with detailed sensor information.
+リアルタイム車両追跡Webアプリケーション - Google Mapsを使って車両の位置とセンサーデータを可視化します。
 
-## Features
+## 🚀 初期環境設定（必須）
 
-- **Real-time tracking**: Automatic data refresh with configurable intervals (5s, 10s, 30s, 60s)
-- **Interactive map**: Google Maps integration with custom markers and polylines
-- **Vehicle management**: Tab-based vehicle selection with real-time status
-- **Detailed sensor data**: Side panel showing GPS coordinates, temperatures, and air pressure
-- **Data export**: Export individual vehicle or all vehicle data as CSV/JSON
-- **Keyboard shortcuts**: Quick navigation and control
-- **Dark theme**: GitHub-inspired monochrome design
-- **Connection monitoring**: Live connection status and retry tracking
+このリポジトリをクローンした後、以下の手順で環境を構築してください。
 
-## Tech Stack
+### 1. 必要なソフトウェア
 
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS 3 (dark mode)
-- **Maps**: Google Maps JavaScript API via `@react-google-maps/api`
-- **State Management**: Zustand
-- **Data Fetching**: SWR with polling
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Data Export**: PapaParse
+- **Node.js 18以上** - [nodejs.org](https://nodejs.org/) からダウンロード
+- **npm** (Node.jsに含まれています)
+- **Google Maps API キー** - [Google Cloud Console](https://console.cloud.google.com/)で取得
 
-## Quick Start
+### 2. プロジェクトのセットアップ
 
-1. **Clone and install dependencies**:
-   ```bash
-   git clone <repository-url>
-   cd vehicle-tracker
-   npm install
-   ```
+```bash
+# 1. このリポジトリをクローン
+git clone <repository-url>
+cd vehicle-tracker
 
-2. **Configure environment variables**:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and add your API keys:
-   ```
-   VITE_GMAPS_API_KEY=your_google_maps_api_key_here
-   VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url_here
-   ```
+# 2. 必要なライブラリをインストール
+npm install
 
-3. **Start development server**:
-   ```bash
-   npm run dev
-   ```
+# 3. 環境設定ファイルを作成
+cp .env.example .env
+```
 
-## Google Apps Script Setup
+### 3. APIキーの設定
 
-Your GAS endpoint should support the following actions:
+`.env`ファイルを編集して以下を設定：
 
-### GET Endpoints
+```bash
+# Google Maps APIキー（必須）
+VITE_GMAPS_API_KEY=your_google_maps_api_key_here
 
-- `?action=getAllVehicles` - Returns all vehicle data
-- `?action=getVehicle&vehicleId=VEHICLE_ID` - Returns specific vehicle data
-- `?action=getVehicleList` - Returns list of available vehicles
+# データ取得先のGoogle Apps Script URL（必須）
+VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url_here
+```
 
-### Expected Data Format
+### 4. アプリケーションの起動
 
+```bash
+# 開発サーバーを起動
+npm run dev
+
+# ブラウザで http://localhost:4000 にアクセス
+```
+
+### 5. 本番用ビルド（オプション）
+
+```bash
+# 本番用にビルド
+npm run build
+
+# ビルドした結果をプレビュー
+npm run preview
+```
+
+---
+
+## 📖 技術仕様書（エンジニア向け）
+
+### システム概要
+
+このWebアプリケーションは、車両のリアルタイム位置追跡とセンサーデータ監視を行います。車両に搭載されたGPSとセンサーからのデータをWebブラウザ上の地図に表示し、運行状況を可視化します。
+
+### アーキテクチャ
+
+```
+[車両センサー] → [Google Sheets + GAS] → [React Webアプリ] → [ユーザー]
+```
+
+1. **データ収集層**: 車両のGPS・センサーデータをGoogle Sheetsに蓄積
+2. **API層**: Google Apps Script (GAS) がREST APIとしてデータを提供
+3. **表示層**: React Webアプリがリアルタイムでデータを取得・表示
+
+### 主要技術スタック
+
+- **フロントエンド**: React 18 + TypeScript
+- **ビルドツール**: Webpack 5 
+- **スタイリング**: Tailwind CSS（ダークテーマ）
+- **地図表示**: Google Maps JavaScript API
+- **状態管理**: Zustand（軽量Redux代替）
+- **データ取得**: SWR（自動リフレッシュ付きHTTPクライアント）
+- **アニメーション**: Framer Motion
+
+### 機能仕様
+
+#### 🗺️ 地図表示機能
+- **リアルタイム位置表示**: 車両の現在位置をマーカーで表示
+- **移動軌跡**: 過去の移動履歴をカラフルな線で描画
+- **経過点表示**: 選択した車両の詳細な移動経路を点で表示
+- **自動追従**: 車両選択時に地図が自動的に中心移動
+
+#### 📊 センサーデータ表示
+- **GPS情報**: 緯度経度、高度、衛星数
+- **環境センサー**: 水温、気圧、気温
+- **タイムスタンプ**: データ取得時刻
+- **Raw JSONデータ**: 技術者向け詳細情報
+
+#### ⚡ リアルタイム更新
+- **自動更新**: 5秒〜60秒間隔で設定可能
+- **接続状態監視**: データ取得の成功/失敗状況を表示
+- **エラー処理**: 接続障害時の自動リトライ機能
+
+#### 💾 データエクスポート
+- **CSV形式**: Excel等で開ける形式でデータ出力
+- **JSON形式**: プログラム処理用のデータ形式
+- **選択エクスポート**: 特定車両または全車両データ
+
+#### 🎮 操作性
+- **キーボードショートカット**: 素早い車両切り替え（1-9キー、矢印キー等）
+- **レスポンシブ対応**: PC・タブレット・スマートフォンで最適表示
+- **タッチ操作**: モバイルデバイスでの直感的操作
+
+### データフォーマット
+
+#### 車両テレメトリーデータ
 ```typescript
 interface TelemetryDataPoint {
-  timestamp: string;           // ISO 8601
-  vehicleId: string;
-  latitude: number;
-  longitude: number;
-  altitude: number;
-  satellites: number;
-  waterTemperature: number;
-  airPressure: number;
-  airTemperature: number;
+  timestamp: string;        // ISO 8601形式の時刻
+  vehicleId: string;       // 車両識別子
+  latitude: number;        // 緯度（度）
+  longitude: number;       // 経度（度）
+  altitude: number;        // 高度（メートル）
+  satellites: number;      // GPS衛星数
+  waterTemperature: number; // 水温（摂氏）
+  airPressure: number;     // 気圧（hPa）
+  airTemperature: number;  // 気温（摂氏）
 }
 ```
 
-## Keyboard Shortcuts
+### APIエンドポイント仕様
 
-| Key | Action |
-|-----|--------|
-| `[` / `]` | Switch between vehicle tabs |
-| `1-9` | Select vehicle by number |
-| `P` | Pause/resume data polling |
-| `E` | Export all vehicle data as CSV |
-| `ESC` | Close side panel |
-| `←` / `→` | Navigate between vehicles |
+Google Apps Scriptは以下のエンドポイントを提供する必要があります：
 
-## Project Structure
+- `GET ?action=getAllVehicles` - 全車両の最新データ取得
+- `GET ?action=getVehicle&vehicleId=XXX` - 特定車両の履歴データ取得
+- `GET ?action=getVehicleList` - 車両一覧取得
+
+### パフォーマンス最適化
+
+- **マーカー制限**: 経過点表示を最大10個に制限してレンダリング負荷軽減
+- **データ間引き**: 非選択車両は10番目ごとにポイント表示
+- **メモリ管理**: 不要なイベントハンドラーのクリーンアップ
+- **バンドルサイズ**: Webpackによるコード分割とminification
+
+### セキュリティ
+
+- **APIキー保護**: 環境変数による機密情報の管理
+- **CORS対応**: 適切なオリジン制限
+- **XSS対策**: React標準のエスケープ処理
+
+---
+
+## 📱 ユーザー操作ガイド
+
+### 基本操作
+
+| 操作 | 方法 |
+|------|------|
+| 車両選択 | 上部タブクリックまたは1-9キー |
+| 車両切り替え | `[` / `]` キーまたは矢印キー |
+| データ更新間隔変更 | 右上の「Refresh」ドロップダウン |
+| 更新一時停止 | `P`キーまたは「Pause」ボタン |
+| データエクスポート | `E`キーまたは下部エクスポートボタン |
+| センサー詳細表示 | マーカークリックまたは情報ボタン |
+| 詳細パネル閉じる | `ESC`キーまたは×ボタン |
+
+### レスポンシブデザイン
+
+- **デスクトップ（1280px以上）**: 地図＋固定サイドパネル
+- **タブレット（1024px-1279px）**: 地図メイン＋オーバーレイパネル  
+- **モバイル（1023px以下）**: フルスクリーン地図＋オーバーレイパネル
+
+---
+
+## 🔧 Google Apps Script設定
+
+データ提供用のGoogle Apps Scriptは以下のエンドポイントをサポートする必要があります：
+
+### 必要なAPIエンドポイント
+
+- `GET ?action=getAllVehicles` - 全車両の最新データを返す
+- `GET ?action=getVehicle&vehicleId=車両ID` - 特定車両の履歴データを返す  
+- `GET ?action=getVehicleList` - 利用可能な車両の一覧を返す
+
+### データ形式仕様
+
+Google Apps Scriptが返すJSONデータの形式：
+
+```json
+{
+  "status": "success",
+  "timestamp": "2025-06-16T12:00:00.000Z",
+  "vehicles": [
+    {
+      "vehicleId": "DRONE_001",
+      "data": [
+        {
+          "timestamp": "2025-06-16T12:00:00.000Z",
+          "vehicleId": "DRONE_001",
+          "latitude": 35.6762,
+          "longitude": 139.6503,
+          "altitude": 120.5,
+          "satellites": 8,
+          "waterTemperature": 22.3,
+          "airPressure": 1013.25,
+          "airTemperature": 25.1
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 🏗️ プロジェクト構造
 
 ```
 src/
-├── api/               # API layer (GAS integration)
-├── components/        # React components
-│   ├── TopBar.tsx    # Status bar with controls
-│   ├── VehicleTabs.tsx # Vehicle selection tabs
-│   ├── MapContainer.tsx # Google Maps wrapper
-│   ├── VehicleMarker.tsx # Map markers
-│   ├── TrackPolyline.tsx # Vehicle tracks
-│   ├── SidePanel.tsx # Sensor detail panel
-│   └── StatusBar.tsx # Connection status and export
-├── hooks/            # Custom React hooks
-├── store/            # Zustand state management
-├── types/            # TypeScript definitions
-├── utils/            # Utility functions
-├── constants/        # Configuration constants
-└── styles/           # CSS and styling
+├── api/               # データ取得API層
+├── components/        # React UIコンポーネント
+│   ├── TopBar.tsx    # ヘッダー（更新間隔設定等）
+│   ├── VehicleTabs.tsx # 車両選択タブ
+│   ├── MapContainer.tsx # Google Maps表示
+│   ├── VehicleMarker.tsx # 車両位置マーカー
+│   ├── WaypointMarker.tsx # 経過点マーカー
+│   ├── TrackPolyline.tsx # 移動軌跡線
+│   ├── SidePanel.tsx # センサー詳細パネル
+│   └── StatusBar.tsx # 接続状態・エクスポート
+├── hooks/            # カスタムReactフック
+├── store/            # グローバル状態管理
+├── types/            # TypeScript型定義
+├── utils/            # ユーティリティ関数
+├── constants/        # 設定定数
+└── assets/           # 静的ファイル
 ```
 
-## Configuration
+---
 
-### Map Styling
-The app uses a custom monochrome Google Maps style defined in `src/constants/map.ts`. You can customize the appearance by modifying the `MONOCHROME_MAP_STYLE` array.
+## ⚙️ カスタマイズ
 
-### Polling Intervals
-Default refresh intervals can be modified in the TopBar component. Available options: 5s, 10s, 30s, 60s.
+### 地図スタイルの変更
+`src/constants/map.ts`の`MONOCHROME_MAP_STYLE`を編集することで、地図の見た目をカスタマイズできます。
 
-### Theme Colors
-Dark theme colors are configured in `tailwind.config.js`:
-- Background: `#0d1117`
-- Surface: `#161b22`  
-- Accent: `#58a6ff`
-- Text: `#c9d1d9`
-- Muted: `#8b949e`
+### 更新間隔の変更  
+`src/components/TopBar.tsx`の`intervalOptions`配列を編集することで、データ更新間隔の選択肢を変更できます。
 
-## Deployment
+### 色テーマの変更
+`tailwind.config.js`でダークテーマの色を設定しています：
+- Background: `#0d1117` (GitHub風ダークグレー)
+- Surface: `#161b22` (カード背景色)
+- Accent: `#58a6ff` (アクセントブルー)
+- Text: `#c9d1d9` (メインテキスト色)
 
-### Build for Production
+---
+
+## 🚀 デプロイ
+
+### 本番ビルド
 ```bash
 npm run build
 ```
 
-### Deploy to Vercel/Netlify
-The app is pre-configured for easy deployment to Vercel or Netlify. Just connect your repository and set the environment variables in the deployment dashboard.
+### Vercel/Netlifyへのデプロイ
+1. GitHubリポジトリをVercel/Netlifyに接続
+2. 環境変数を設定：
+   - `VITE_GMAPS_API_KEY`
+   - `VITE_GAS_ENDPOINT`
+3. 自動デプロイが開始されます
 
-## Development
+---
 
-### Code Style
-- Uses TypeScript strict mode
-- ESLint configuration for code quality
-- Prettier for code formatting
+## 🧑‍💻 開発者向け情報
 
-### Testing
+### コード品質
+- TypeScript strict mode使用
+- ESLint設定済み
+- 統一的なコーディングスタイル
+
+### ビルドコマンド
 ```bash
-npm run test
+npm run build    # 本番用ビルド
+npm run lint     # コード品質チェック  
+npm run preview  # ビルド結果のプレビュー
 ```
 
-### Type Checking
-```bash
-npm run type-check
-```
+---
 
-## License
+## 📄 ライセンス
 
-MIT License - see LICENSE file for details.
+MIT License - 詳細はLICENSEファイルを参照
 
-## Contributing
+## 🤝 コントリビューション
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+1. このリポジトリをフォーク
+2. 機能ブランチを作成
+3. 変更を実装  
+4. テスト追加（該当する場合）
+5. プルリクエストを送信
