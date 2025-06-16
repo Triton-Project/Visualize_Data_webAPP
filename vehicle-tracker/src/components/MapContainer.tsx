@@ -92,12 +92,11 @@ export const MapContainer: React.FC = () => {
   const currentCenter = mapCenter || DEFAULT_CENTER;
 
   return (
-    <div className="card overflow-hidden flex-1 relative" style={{ minHeight: '400px' }}>
+    <div className="card overflow-hidden w-full h-full relative">
       <GoogleMap
         mapContainerStyle={{ 
           width: '100%', 
           height: '100%',
-          minHeight: '400px',
           display: 'block'
         }}
         center={currentCenter}

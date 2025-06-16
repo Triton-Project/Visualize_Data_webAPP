@@ -40,11 +40,11 @@ export const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Mobile info button */}
+          {/* Info button for devices without persistent sidebar */}
           {selectedDataPoint && (
             <button
               onClick={() => setSidePanelOpen(true)}
-              className="lg:hidden btn btn-secondary p-2"
+              className="xl:hidden btn btn-secondary p-2"
               title="Show sensor details"
             >
               <Info size={16} />

@@ -21,9 +21,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({ isDesktop = false }) => {
     // Desktop: Static side panel
     return (
       <div className="h-full bg-dark-surface border border-dark-muted/20 rounded-lg overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-dark-text">
+        <div className="p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
+            <h2 className="text-base lg:text-lg font-semibold text-dark-text">
               Sensor Details
             </h2>
           </div>

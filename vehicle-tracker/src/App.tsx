@@ -25,32 +25,32 @@ function App() {
 
   return (
     <div className="min-h-screen bg-dark-bg">
-      <div className="h-screen flex flex-col">
+      <div className="h-screen flex flex-col max-w-full">
         {/* Header section */}
-        <div className="flex-shrink-0 p-4 pb-0">
+        <div className="flex-shrink-0 p-2 sm:p-4 pb-0">
           <TopBar />
           <VehicleTabs />
         </div>
         
         {/* Main content area */}
-        <div className="flex-1 flex p-4 pt-2 gap-4 min-h-0">
-          <div className="flex-1 min-w-0">
+        <div className="flex-1 flex p-2 sm:p-4 pt-1 sm:pt-2 gap-2 sm:gap-4 min-h-0 overflow-hidden">
+          <div className="flex-1 min-w-0 min-h-0">
             <MapContainer />
           </div>
           
-          {/* Side panel will be overlay on smaller screens */}
-          <div className="hidden lg:block w-80 flex-shrink-0">
+          {/* Side panel with responsive width - hidden on medium screens to give more space to map */}
+          <div className="hidden xl:block w-80 2xl:w-96 flex-shrink-0">
             <SidePanel isDesktop={true} />
           </div>
         </div>
         
         {/* Footer */}
-        <div className="flex-shrink-0 p-4 pt-0">
+        <div className="flex-shrink-0 p-2 sm:p-4 pt-0">
           <StatusBar />
         </div>
         
-        {/* Mobile side panel as overlay */}
-        <div className="lg:hidden">
+        {/* Mobile/tablet side panel as overlay - now shows on medium and large screens too when sidebar is hidden */}
+        <div className="xl:hidden">
           <SidePanel isDesktop={false} />
         </div>
         

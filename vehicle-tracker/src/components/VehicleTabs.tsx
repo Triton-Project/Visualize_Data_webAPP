@@ -37,8 +37,8 @@ export const VehicleTabs: React.FC = () => {
   }
 
   return (
-    <div className="mb-4">
-      <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-dark-muted/30 scrollbar-track-transparent">
+    <div className="mb-2 lg:mb-4">
+      <div className="flex space-x-1 lg:space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-dark-muted/30 scrollbar-track-transparent">
         {vehicleIds.map((vehicleId) => {
           const isSelected = selectedVehicleId === vehicleId;
           const latestPoint = getLatestDataPoint(vehicleId);
