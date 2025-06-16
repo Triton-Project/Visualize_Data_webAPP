@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { TopBar } from './components/TopBar';
 import { VehicleTabs } from './components/VehicleTabs';
+import { ViewToggle } from './components/ViewToggle';
 import { MapContainer } from './components/MapContainer';
+import { SensorGraphs } from './components/SensorGraphs';
 import { SidePanel } from './components/SidePanel';
 import { StatusBar } from './components/StatusBar';
 import { useVehicleData } from './hooks/useVehicleData';
@@ -10,7 +12,7 @@ import { useAppStore } from './store';
 
 function App() {
   const { vehicleTracks, error, isLoading } = useVehicleData();
-  const { setSelectedVehicle, selectedVehicleId, getVehicleIds } = useAppStore();
+  const { setSelectedVehicle, selectedVehicleId, getVehicleIds, currentView } = useAppStore();
 
   // Enable keyboard shortcuts
   useKeyboardShortcuts();
@@ -29,19 +31,28 @@ function App() {
         {/* Header section */}
         <div className="flex-shrink-0 p-2 sm:p-4 pb-0">
           <TopBar />
-          <VehicleTabs />
+          <div className="flex items-center justify-between mb-2 lg:mb-4">
+            <div className="flex-1">
+              <VehicleTabs />
+            </div>
+            <div className="ml-4">
+              <ViewToggle />
+            </div>
+          </div>
         </div>
         
         {/* Main content area */}
         <div className="flex-1 flex p-2 sm:p-4 pt-1 sm:pt-2 gap-2 sm:gap-4 min-h-0 overflow-hidden">
           <div className="flex-1 min-w-0 min-h-0">
-            <MapContainer />
+            {currentView === 'map' ? <MapContainer /> : <SensorGraphs />}
           </div>
           
-          {/* Side panel with responsive width - hidden on medium screens to give more space to map */}
-          <div className="hidden xl:block w-80 2xl:w-96 flex-shrink-0">
-            <SidePanel isDesktop={true} />
-          </div>
+          {/* Side panel with responsive width - only show for map view */}
+          {currentView === 'map' && (
+            <div className="hidden xl:block w-80 2xl:w-96 flex-shrink-0">
+              <SidePanel isDesktop={true} />
+            </div>
+          )}
         </div>
         
         {/* Footer */}
@@ -49,10 +60,12 @@ function App() {
           <StatusBar />
         </div>
         
-        {/* Mobile/tablet side panel as overlay - now shows on medium and large screens too when sidebar is hidden */}
-        <div className="xl:hidden">
-          <SidePanel isDesktop={false} />
-        </div>
+        {/* Mobile/tablet side panel as overlay - only show for map view */}
+        {currentView === 'map' && (
+          <div className="xl:hidden">
+            <SidePanel isDesktop={false} />
+          </div>
+        )}
         
         {/* Loading overlay */}
         {isLoading && Object.keys(vehicleTracks).length === 0 && (
