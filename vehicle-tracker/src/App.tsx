@@ -47,10 +47,12 @@ function App() {
             {currentView === 'map' ? <MapContainer /> : <SensorGraphs />}
           </div>
           
-          {/* Side panel with responsive width - hidden on medium screens to give more space to map */}
-          <div className="hidden xl:block w-80 2xl:w-96 flex-shrink-0">
-            <SidePanel isDesktop={true} />
-          </div>
+          {/* Side panel with responsive width - only show for map view */}
+          {currentView === 'map' && (
+            <div className="hidden xl:block w-80 2xl:w-96 flex-shrink-0">
+              <SidePanel isDesktop={true} />
+            </div>
+          )}
         </div>
         
         {/* Footer */}
@@ -58,10 +60,12 @@ function App() {
           <StatusBar />
         </div>
         
-        {/* Mobile/tablet side panel as overlay - now shows on medium and large screens too when sidebar is hidden */}
-        <div className="xl:hidden">
-          <SidePanel isDesktop={false} />
-        </div>
+        {/* Mobile/tablet side panel as overlay - only show for map view */}
+        {currentView === 'map' && (
+          <div className="xl:hidden">
+            <SidePanel isDesktop={false} />
+          </div>
+        )}
         
         {/* Loading overlay */}
         {isLoading && Object.keys(vehicleTracks).length === 0 && (

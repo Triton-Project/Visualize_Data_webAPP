@@ -12,6 +12,7 @@ interface AppState {
   refreshInterval: number; // in seconds
   isPaused: boolean;
   currentView: 'map' | 'graphs';
+  hasViewedGraphs: boolean;
   
   // Connection status
   connectionStatus: ConnectionStatus;
@@ -47,6 +48,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   refreshInterval: 5,
   isPaused: false,
   currentView: 'map',
+  hasViewedGraphs: false,
   connectionStatus: {
     isConnected: false,
     lastUpdate: null,
@@ -83,7 +85,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
   
-  setCurrentView: (view) => set({ currentView: view }),
+  setCurrentView: (view) => set((state) => ({ 
+    currentView: view, 
+    hasViewedGraphs: state.hasViewedGraphs || view === 'graphs' 
+  })),
   
   // Computed getters
   getVehicleIds: () => Object.keys(get().vehicleTracks),
