@@ -33,7 +33,7 @@ export interface TelemetryDataPoint {
 
 export type VehicleTracks = Record<string, TelemetryDataPoint[]>;
 
-export interface GASResponse<T = any> {
+export interface GASResponse {
   status: 'success' | 'error';
   message?: string;
   timestamp: string;

@@ -3,6 +3,7 @@ import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { useAppStore } from '../store';
 import { DEFAULT_MAP_OPTIONS, DEFAULT_CENTER } from '../constants/map';
 import { VehicleMarker } from './VehicleMarker';
+import { WaypointMarker } from './WaypointMarker';
 import { TrackPolyline } from './TrackPolyline';
 
 const GOOGLE_MAPS_LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = [];
@@ -13,9 +14,6 @@ export const MapContainer: React.FC = () => {
     vehicleTracks, 
     mapCenter, 
     mapZoom, 
-    setMapCenter, 
-    setMapZoom,
-    getSelectedVehicleData,
     getLatestDataPoint,
   } = useAppStore();
 
@@ -26,6 +24,7 @@ export const MapContainer: React.FC = () => {
     googleMapsApiKey: import.meta.env.VITE_GMAPS_API_KEY || '',
     libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
 
   // Auto-center on selected vehicle's latest position
   useEffect(() => {
@@ -65,6 +64,7 @@ export const MapContainer: React.FC = () => {
   }, []);
 
 
+
   if (loadError) {
     return (
       <div className="card p-8 flex-1 flex items-center justify-center">
@@ -89,13 +89,17 @@ export const MapContainer: React.FC = () => {
     );
   }
 
-  const selectedVehicleData = getSelectedVehicleData();
   const currentCenter = mapCenter || DEFAULT_CENTER;
 
   return (
-    <div className="card overflow-hidden flex-1 relative">
+    <div className="card overflow-hidden flex-1 relative" style={{ minHeight: '400px' }}>
       <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%' }}
+        mapContainerStyle={{ 
+          width: '100%', 
+          height: '100%',
+          minHeight: '400px',
+          display: 'block'
+        }}
         center={currentCenter}
         zoom={mapZoom}
         onLoad={onLoad}
@@ -112,7 +116,7 @@ export const MapContainer: React.FC = () => {
           />
         ))}
 
-        {/* Render markers for all vehicles */}
+        {/* Render markers for latest positions only */}
         {Object.entries(vehicleTracks).map(([vehicleId, data]) => {
           const latestPoint = data[data.length - 1];
           if (!latestPoint) return null;
@@ -126,6 +130,22 @@ export const MapContainer: React.FC = () => {
             />
           );
         })}
+
+        {/* Render additional waypoint markers for selected vehicle only */}
+        {selectedVehicleId && vehicleTracks[selectedVehicleId] && (
+          vehicleTracks[selectedVehicleId]
+            .slice(0, -1) // Exclude latest point (already shown by VehicleMarker)
+            .filter((_, index, array) => index % Math.max(1, Math.floor(array.length / 10)) === 0) // Max 10 waypoints
+            .map((dataPoint, index) => (
+              <WaypointMarker
+                key={`${selectedVehicleId}-waypoint-${index}`}
+                vehicleId={selectedVehicleId}
+                dataPoint={dataPoint}
+                isSelected={true}
+                isLatest={false}
+              />
+            ))
+        )}
       </GoogleMap>
     </div>
   );

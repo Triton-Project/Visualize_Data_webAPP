@@ -24,19 +24,35 @@ function App() {
   }, [vehicleTracks, selectedVehicleId, setSelectedVehicle, getVehicleIds]);
 
   return (
-    <div className="min-h-screen bg-dark-bg p-4">
-      <div className="max-w-7xl mx-auto">
-        <TopBar />
-        
-        <VehicleTabs />
-        
-        <div className="flex gap-4 h-[calc(100vh-200px)]">
-          <MapContainer />
+    <div className="min-h-screen bg-dark-bg">
+      <div className="h-screen flex flex-col">
+        {/* Header section */}
+        <div className="flex-shrink-0 p-4 pb-0">
+          <TopBar />
+          <VehicleTabs />
         </div>
         
-        <StatusBar />
+        {/* Main content area */}
+        <div className="flex-1 flex p-4 pt-2 gap-4 min-h-0">
+          <div className="flex-1 min-w-0">
+            <MapContainer />
+          </div>
+          
+          {/* Side panel will be overlay on smaller screens */}
+          <div className="hidden lg:block w-80 flex-shrink-0">
+            <SidePanel isDesktop={true} />
+          </div>
+        </div>
         
-        <SidePanel />
+        {/* Footer */}
+        <div className="flex-shrink-0 p-4 pt-0">
+          <StatusBar />
+        </div>
+        
+        {/* Mobile side panel as overlay */}
+        <div className="lg:hidden">
+          <SidePanel isDesktop={false} />
+        </div>
         
         {/* Loading overlay */}
         {isLoading && Object.keys(vehicleTracks).length === 0 && (

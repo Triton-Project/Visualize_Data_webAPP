@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAppStore } from '../store';
 import { motion } from 'framer-motion';
+import { Info } from 'lucide-react';
 
 export const TopBar: React.FC = () => {
   const { 
@@ -9,6 +10,8 @@ export const TopBar: React.FC = () => {
     isPaused, 
     setPaused,
     connectionStatus,
+    selectedDataPoint,
+    setSidePanelOpen,
   } = useAppStore();
 
   const intervalOptions = [5, 10, 30, 60];
@@ -37,7 +40,18 @@ export const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+          {/* Mobile info button */}
+          {selectedDataPoint && (
+            <button
+              onClick={() => setSidePanelOpen(true)}
+              className="lg:hidden btn btn-secondary p-2"
+              title="Show sensor details"
+            >
+              <Info size={16} />
+            </button>
+          )}
+          
+          <div className="hidden sm:flex items-center space-x-2">
             <label className="text-sm text-dark-muted">Refresh:</label>
             <select
               value={refreshInterval}
@@ -54,7 +68,7 @@ export const TopBar: React.FC = () => {
 
           <button
             onClick={() => setPaused(!isPaused)}
-            className={`btn ${isPaused ? 'btn-primary' : 'btn-secondary'}`}
+            className={`btn ${isPaused ? 'btn-primary' : 'btn-secondary'} text-sm px-3 py-2`}
           >
             {isPaused ? 'Resume' : 'Pause'}
           </button>

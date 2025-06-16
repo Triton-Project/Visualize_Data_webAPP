@@ -16,15 +16,15 @@ The system receives sensor telemetry data via POST requests, stores it in Google
 ```bash
 cd vehicle-tracker
 npm install          # Install dependencies
-npm run dev          # Start development server (localhost:3000)
-npm run build        # Build for production
+npm run dev          # Start development server (uses webpack-dev-server)
+npm run build        # Build for production (uses webpack)
 npm run lint         # Run ESLint
-npm run preview      # Preview production build
+npm run preview      # Preview production build (uses serve)
 ```
 
 ### Linting and Type Checking
 - **Lint**: `npm run lint` (in vehicle-tracker directory)
-- **Type check**: TypeScript compilation happens during build (`tsc -b && vite build`)
+- **Type check**: TypeScript compilation happens during build (webpack handles TypeScript)
 
 ## Architecture
 
@@ -90,3 +90,20 @@ The app uses a custom monochrome map style. Modify `MONOCHROME_MAP_STYLE` in `sr
 
 ### Testing GAS Functions
 Use `testFunction()` and `testWebAppAPI()` functions in the GAS editor for manual testing.
+
+## Build System
+
+The project uses **Webpack** (not Vite) for the build system:
+- **Development**: `webpack-dev-server` for hot reloading
+- **Production**: Standard webpack build with minification
+- **Configuration**: `webpack.config.js` handles TypeScript, PostCSS, and asset processing
+
+## Environment Setup
+
+The frontend requires two environment variables in `vehicle-tracker/.env`:
+```
+VITE_GMAPS_API_KEY=your_google_maps_api_key
+VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url
+```
+
+Note: Despite using webpack, environment variables still use the `VITE_` prefix for consistency.

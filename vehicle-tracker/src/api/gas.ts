@@ -82,7 +82,7 @@ export async function getVehicleList(): Promise<string[]> {
   return response.vehicles?.map(v => v.vehicleId) || [];
 }
 
-export async function postTelemetryData(data: any): Promise<void> {
+export async function postTelemetryData(data: Record<string, unknown>): Promise<void> {
   if (!GAS_ENDPOINT) {
     throw new GASApiError('GAS endpoint not configured');
   }

@@ -76,13 +76,14 @@ export function useKeyboardShortcuts() {
         case '6':
         case '7':
         case '8':
-        case '9':
+        case '9': {
           event.preventDefault();
           const index = parseInt(event.key) - 1;
           if (vehicleIds[index]) {
             setSelectedVehicle(vehicleIds[index]);
           }
           break;
+        }
       }
     };
 

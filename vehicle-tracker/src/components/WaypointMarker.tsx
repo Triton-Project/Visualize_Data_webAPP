@@ -3,13 +3,14 @@ import { Marker } from '@react-google-maps/api';
 import { TelemetryDataPoint } from '../types';
 import { useAppStore } from '../store';
 
-interface VehicleMarkerProps {
+interface WaypointMarkerProps {
   vehicleId: string;
   dataPoint: TelemetryDataPoint;
   isSelected: boolean;
+  isLatest: boolean;
 }
 
-// Color palette for different vehicles (matching TrackPolyline and WaypointMarker)
+// Color palette for different vehicles (improved colors)
 const VEHICLE_COLORS = [
   '#58a6ff', // Blue
   '#7c3aed', // Purple  
@@ -21,10 +22,11 @@ const VEHICLE_COLORS = [
   '#84cc16', // Lime
 ];
 
-export const VehicleMarker: React.FC<VehicleMarkerProps> = ({
+export const WaypointMarker: React.FC<WaypointMarkerProps> = ({
   vehicleId,
   dataPoint,
   isSelected,
+  isLatest,
 }) => {
   const { setSelectedDataPoint, setSelectedVehicle, getVehicleIds } = useAppStore();
 
@@ -38,14 +40,23 @@ export const VehicleMarker: React.FC<VehicleMarkerProps> = ({
   const vehicleIndex = vehicleIds.indexOf(vehicleId);
   const vehicleColor = VEHICLE_COLORS[vehicleIndex % VEHICLE_COLORS.length];
 
-  // Create custom marker icon
-  const markerIcon = {
+  // Create different marker styles for waypoints vs current position
+  const markerIcon = isLatest ? {
+    // Current position marker (larger, animated)
     path: google.maps.SymbolPath.CIRCLE,
     fillColor: vehicleColor,
     fillOpacity: 1,
     strokeColor: '#0d1117',
     strokeWeight: 3,
     scale: isSelected ? 14 : 10,
+  } : {
+    // Waypoint marker (smaller, subtle)
+    path: google.maps.SymbolPath.CIRCLE,
+    fillColor: vehicleColor,
+    fillOpacity: 0.7,
+    strokeColor: '#0d1117',
+    strokeWeight: 1,
+    scale: isSelected ? 6 : 4,
   };
 
   return (
@@ -57,8 +68,8 @@ export const VehicleMarker: React.FC<VehicleMarkerProps> = ({
       onClick={handleMarkerClick}
       icon={markerIcon}
       title={`${vehicleId} - ${new Date(dataPoint.timestamp).toLocaleString()}`}
-      animation={isSelected ? google.maps.Animation.BOUNCE : undefined}
-      zIndex={isSelected ? 1000 : 100}
+      animation={isSelected && isLatest ? google.maps.Animation.BOUNCE : undefined}
+      zIndex={isLatest ? 1000 : (isSelected ? 500 : 100)}
     />
   );
 };

@@ -1,0 +1,82 @@
+Who knows he's a deal with? <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Maps Test</title>
+    <style>
+      #map {
+          height: 400px;Oh, I know. Right. Go to my email. Don't know. We go to my star. You need to ask some more. Some more. Thank you. No. Did it cost A? You spend each hand in the. City. I. Would you hand the momentum without code for the extraordinary? What? Bunny. Not one night.
+          width: 100%;
+          border: 2px solid red;
+      }
+      .debug {
+          background: #f0f0f0;
+          padding: 10px;
+          margin: 10px 0;
+          border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Google Maps JavaScript API Test</h1>
+
+    <div class="debug">
+      <h3>Debug Info:</h3>
+      <div id="debug-info">Loading...</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+      const apiKey = "AIzaSyCQQqpjKZP6_y5DYSWROZ2p_6wiRsTxW4E";
+      const debugDiv = document.getElementById("debug-info");
+
+      function updateDebug(message) {
+        debugDiv.innerHTML +=
+          "<br>" + new Date().toLocaleTimeString() + ": " + message;
+        console.log(message);
+      }
+
+      updateDebug("Starting Google Maps test...");
+      updateDebug("API Key: " + apiKey.substring(0, 10) + "...");
+
+      function initMap() {
+        updateDebug("initMap function called");
+
+        try {
+          const map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 35.6762, lng: 139.6503 }, // Tokyo
+            zoom: 10,
+          });
+
+          updateDebug("Map created successfully!");
+
+          // Add a marker
+          const marker = new google.maps.Marker({
+            position: { lat: 35.6762, lng: 139.6503 },
+            map: map,
+            title: "Test Marker",
+          });
+
+          updateDebug("Marker added successfully!");
+        } catch (error) {
+          updateDebug("Error creating map: " + error.message);
+          console.error("Map creation error:", error);
+        }
+      }
+
+      function onGoogleMapsError() {
+        updateDebug("Google Maps failed to load!");
+      }
+
+      // Load Google Maps API
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+      script.onerror = onGoogleMapsError;
+      document.head.appendChild(script);
+
+      updateDebug("Google Maps script tag added");
+    </script>
+  </body>
+</html>

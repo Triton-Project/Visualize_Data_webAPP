@@ -38,7 +38,7 @@ export const VehicleTabs: React.FC = () => {
 
   return (
     <div className="mb-4">
-      <div className="flex space-x-2 overflow-x-auto pb-2">
+      <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-dark-muted/30 scrollbar-track-transparent">
         {vehicleIds.map((vehicleId) => {
           const isSelected = selectedVehicleId === vehicleId;
           const latestPoint = getLatestDataPoint(vehicleId);
@@ -49,7 +49,7 @@ export const VehicleTabs: React.FC = () => {
               key={vehicleId}
               onClick={() => handleTabClick(vehicleId)}
               className={`
-                flex-shrink-0 px-4 py-3 rounded-card border transition-all duration-150 ease-out
+                flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 rounded-card border transition-all duration-150 ease-out min-w-0
                 ${isSelected 
                   ? 'bg-dark-accent text-white border-dark-accent' 
                   : 'bg-dark-surface text-dark-text border-dark-muted/30 hover:border-dark-accent/50'
@@ -58,15 +58,15 @@ export const VehicleTabs: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="text-left">
-                <div className="font-medium text-sm">
+              <div className="text-left min-w-0">
+                <div className="font-medium text-xs sm:text-sm truncate">
                   {vehicleId}
                 </div>
-                <div className="text-xs opacity-70 mt-1">
+                <div className="text-xs opacity-70 mt-1 hidden sm:block">
                   {dataCount} points
                 </div>
                 {latestPoint && (
-                  <div className="text-xs opacity-60 mt-1">
+                  <div className="text-xs opacity-60 mt-1 hidden md:block">
                     Last: {new Date(latestPoint.timestamp).toLocaleTimeString()}
                   </div>
                 )}
