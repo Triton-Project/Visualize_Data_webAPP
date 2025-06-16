@@ -11,6 +11,7 @@ interface AppState {
   isSidePanelOpen: boolean;
   refreshInterval: number; // in seconds
   isPaused: boolean;
+  currentView: 'map' | 'graphs';
   
   // Connection status
   connectionStatus: ConnectionStatus;
@@ -29,6 +30,7 @@ interface AppState {
   setConnectionStatus: (status: Partial<ConnectionStatus>) => void;
   setMapCenter: (center: google.maps.LatLngLiteral) => void;
   setMapZoom: (zoom: number) => void;
+  setCurrentView: (view: 'map' | 'graphs') => void;
   
   // Computed getters
   getVehicleIds: () => string[];
@@ -44,6 +46,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSidePanelOpen: false,
   refreshInterval: 5,
   isPaused: false,
+  currentView: 'map',
   connectionStatus: {
     isConnected: false,
     lastUpdate: null,
@@ -79,6 +82,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMapCenter: (center) => set({ mapCenter: center }),
   
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
+  
+  setCurrentView: (view) => set({ currentView: view }),
   
   // Computed getters
   getVehicleIds: () => Object.keys(get().vehicleTracks),
