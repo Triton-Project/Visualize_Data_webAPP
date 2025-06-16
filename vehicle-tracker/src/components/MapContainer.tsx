@@ -134,7 +134,6 @@ export const MapContainer: React.FC = () => {
         {selectedVehicleId && vehicleTracks[selectedVehicleId] && (
           vehicleTracks[selectedVehicleId]
             .slice(0, -1) // Exclude latest point (already shown by VehicleMarker)
-            .filter((_, index, array) => index % Math.max(1, Math.floor(array.length / 10)) === 0) // Max 10 waypoints
             .map((dataPoint, index) => (
               <WaypointMarker
                 key={`${selectedVehicleId}-waypoint-${index}`}
