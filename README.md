@@ -38,6 +38,8 @@ VITE_GMAPS_API_KEY=your_google_maps_api_key_here
 VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url_here
 ```
 
+(GAS もデプロイしてね)
+
 ### 4. アプリケーションの起動
 
 ```bash
