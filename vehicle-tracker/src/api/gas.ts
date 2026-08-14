@@ -21,6 +21,7 @@ export class GASApiError extends Error {
 interface LegacyTelemetryDataPoint {
   time?: string;
   tmp?: number | string;
+  hum?: number | string;
   prs?: number | string;
   wtmp?: number | string;
   waterTemp?: number | string;
@@ -114,11 +115,10 @@ async function getLegacyVehicleTracks(): Promise<VehicleTracks> {
       vehicleId: 'DRONE_001',
       latitude: toNumber(point.Lat),
       longitude: toNumber(point.Lng),
-      altitude: 0,
-      satellites: 0,
       waterTemperature: toNumber(point.wtmp ?? point.waterTemp),
       airPressure: toNumber(point.prs),
       airTemperature: toNumber(point.tmp),
+      humidity: toNumber(point.hum),
     }))
     .filter(hasValidCoordinates)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());

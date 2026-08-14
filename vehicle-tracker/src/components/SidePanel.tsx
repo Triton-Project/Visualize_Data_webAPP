@@ -103,13 +103,17 @@ const SidePanelContent: React.FC<{ selectedDataPoint: TelemetryDataPoint }> = ({
         <div className="flex justify-between">
           <span className="text-dark-muted">Altitude:</span>
           <span className="font-mono text-dark-text">
-            {selectedDataPoint.altitude.toFixed(1)} m
+            {selectedDataPoint.altitude == null
+              ? 'データなし'
+              : `${selectedDataPoint.altitude.toFixed(1)} m`}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-dark-muted">Satellites:</span>
           <span className="font-mono text-dark-text">
-            {selectedDataPoint.satellites}
+            {selectedDataPoint.satellites == null
+              ? 'データなし'
+              : selectedDataPoint.satellites}
           </span>
         </div>
       </div>
@@ -143,6 +147,17 @@ const SidePanelContent: React.FC<{ selectedDataPoint: TelemetryDataPoint }> = ({
           <div className="text-right">
             <span className="font-mono text-dark-text text-lg">
               {selectedDataPoint.airTemperature.toFixed(1)}°C
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-dark-muted">Humidity:</span>
+          <div className="text-right">
+            <span className="font-mono text-dark-text text-lg">
+              {selectedDataPoint.humidity == null
+                ? 'データなし'
+                : `${selectedDataPoint.humidity.toFixed(1)}%`}
             </span>
           </div>
         </div>

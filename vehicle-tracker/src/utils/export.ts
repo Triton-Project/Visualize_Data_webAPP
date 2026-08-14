@@ -18,6 +18,7 @@ export function exportToCSV(data: TelemetryDataPoint[], filename: string = 'vehi
       'waterTemperature',
       'airPressure',
       'airTemperature',
+      'humidity',
     ],
   });
 

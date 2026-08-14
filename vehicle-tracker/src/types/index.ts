@@ -24,11 +24,12 @@ export interface TelemetryDataPoint {
   vehicleId: string;
   latitude: number;
   longitude: number;
-  altitude: number;
-  satellites: number;
+  altitude?: number;
+  satellites?: number;
   waterTemperature: number;
   airPressure: number;
   airTemperature: number;
+  humidity?: number;
 }
 
 export type VehicleTracks = Record<string, TelemetryDataPoint[]>;
