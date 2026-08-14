@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { getAllVehicles, GASApiError } from '../api/gas';
 import { useAppStore } from '../store';
-import { VehicleTracks } from '../types';
+import type { VehicleTracks } from '../types';
 import { useEffect } from 'react';
 
 export function useVehicleData() {

@@ -187,6 +187,6 @@ export const DEFAULT_MAP_OPTIONS: google.maps.MapOptions = {
 };
 
 export const DEFAULT_CENTER = {
-  lat: 35.6762,
-  lng: 139.6503, // Tokyo
+  lat: 33.5546,
+  lng: 130.3773, // Fukuoka test area
 };

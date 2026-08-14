@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { TopBar } from './components/TopBar';
 import { VehicleTabs } from './components/VehicleTabs';
 import { MapContainer } from './components/MapContainer';

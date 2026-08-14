@@ -7,6 +7,7 @@ import { WaypointMarker } from './WaypointMarker';
 import { TrackPolyline } from './TrackPolyline';
 
 const GOOGLE_MAPS_LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = [];
+const MAX_WAYPOINT_MARKERS = 100;
 
 export const MapContainer: React.FC = () => {
   const { 
@@ -89,7 +90,13 @@ export const MapContainer: React.FC = () => {
     );
   }
 
-  const currentCenter = mapCenter || DEFAULT_CENTER;
+  const selectedLatestPoint = selectedVehicleId
+    ? getLatestDataPoint(selectedVehicleId)
+    : null;
+  const currentCenter = mapCenter
+    || (selectedLatestPoint
+      ? { lat: selectedLatestPoint.latitude, lng: selectedLatestPoint.longitude }
+      : DEFAULT_CENTER);
 
   return (
     <div className="card overflow-hidden w-full h-full relative">
@@ -131,10 +138,11 @@ export const MapContainer: React.FC = () => {
         })}
 
         {/* Render additional waypoint markers for selected vehicle only */}
-        {selectedVehicleId && vehicleTracks[selectedVehicleId] && (
-          vehicleTracks[selectedVehicleId]
-            .slice(0, -1) // Exclude latest point (already shown by VehicleMarker)
-            .filter((_, index, array) => index % Math.max(1, Math.floor(array.length / 10)) === 0) // Max 10 waypoints
+        {selectedVehicleId && vehicleTracks[selectedVehicleId] && (() => {
+          const historicalPoints = vehicleTracks[selectedVehicleId].slice(0, -1);
+          const sampleStep = Math.max(1, Math.ceil(historicalPoints.length / MAX_WAYPOINT_MARKERS));
+          return historicalPoints
+            .filter((_, index) => index % sampleStep === 0 || index === historicalPoints.length - 1)
             .map((dataPoint, index) => (
               <WaypointMarker
                 key={`${selectedVehicleId}-waypoint-${index}`}
@@ -143,8 +151,8 @@ export const MapContainer: React.FC = () => {
                 isSelected={true}
                 isLatest={false}
               />
-            ))
-        )}
+            ));
+        })()}
       </GoogleMap>
     </div>
   );

@@ -6,6 +6,7 @@
     "dev": "webpack serve --mode development",
     "build": "webpack --mode production",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "preview": "npx serve dist"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
     "@types/papaparse": "^5.3.16",
     "autoprefixer": "^10.4.21",
     "framer-motion": "^12.18.1",
+    "lucide-react": "^0.515.0",
     "papaparse": "^5.5.3",
     "postcss": "^8.5.5",
     "react": "^19.1.0",

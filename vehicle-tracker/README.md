@@ -22,8 +22,11 @@ cd vehicle-tracker
 # 2. 必要なライブラリをインストール
 npm install
 
-# 3. 環境設定ファイルを作成
+# 3. 環境設定ファイルを作成（macOS/Linux）
 cp .env.example .env
+
+# Windows PowerShellの場合
+Copy-Item .env.example .env
 ```
 
 ### 3. APIキーの設定
@@ -77,7 +80,7 @@ npm run preview
 
 ### 主要技術スタック
 
-- **フロントエンド**: React 18 + TypeScript
+- **フロントエンド**: React 19 + TypeScript
 - **ビルドツール**: Webpack 5 
 - **スタイリング**: Tailwind CSS（ダークテーマ）
 - **地図表示**: Google Maps JavaScript API
@@ -148,7 +151,7 @@ Google Apps Scriptは以下のエンドポイントを提供する必要があ�
 
 ### セキュリティ
 
-- **APIキー保護**: 環境変数による機密情報の管理
+- **APIキー保護**: `.env`でソースコードから分離し、Google Cloud側でWebサイトとMaps JavaScript APIに利用制限を設定
 - **CORS対応**: 適切なオリジン制限
 - **XSS対策**: React標準のエスケープ処理
 
@@ -285,6 +288,7 @@ npm run build
 ```bash
 npm run build    # 本番用ビルド
 npm run lint     # コード品質チェック  
+npm run typecheck # TypeScript型チェック
 npm run preview  # ビルド結果のプレビュー
 ```
 

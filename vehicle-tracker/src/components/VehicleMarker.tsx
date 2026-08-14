@@ -1,6 +1,6 @@
 import React from 'react';
 import { Marker } from '@react-google-maps/api';
-import { TelemetryDataPoint } from '../types';
+import type { TelemetryDataPoint } from '../types';
 import { useAppStore } from '../store';
 
 interface VehicleMarkerProps {

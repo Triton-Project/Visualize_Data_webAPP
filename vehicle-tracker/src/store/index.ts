@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { TelemetryDataPoint, VehicleTracks, ConnectionStatus } from '../types';
+import type { TelemetryDataPoint, VehicleTracks, ConnectionStatus } from '../types';
 
 interface AppState {
   // Vehicle data

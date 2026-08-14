@@ -33,16 +33,11 @@ export interface TelemetryDataPoint {
 
 export type VehicleTracks = Record<string, TelemetryDataPoint[]>;
 
-export interface GASResponse {
+export type GASResponse<T extends object = Record<string, never>> = {
   status: 'success' | 'error';
   message?: string;
   timestamp: string;
-  vehicles?: VehicleData[];
-  totalVehicles?: number;
-  vehicleId?: string;
-  data?: TelemetryDataPoint[];
-  dataCount?: number;
-}
+} & T;
 
 export interface ConnectionStatus {
   isConnected: boolean;

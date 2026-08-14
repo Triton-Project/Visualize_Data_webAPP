@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store';
 import { X } from 'lucide-react';
-import { TelemetryDataPoint } from '../types';
+import type { TelemetryDataPoint } from '../types';
 
 interface SidePanelProps {
   isDesktop?: boolean;

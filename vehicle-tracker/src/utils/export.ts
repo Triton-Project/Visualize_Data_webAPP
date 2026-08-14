@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { TelemetryDataPoint, VehicleTracks } from '../types';
+import type { TelemetryDataPoint, VehicleTracks } from '../types';
 
 export function exportToCSV(data: TelemetryDataPoint[], filename: string = 'vehicle-data') {
   if (data.length === 0) {
