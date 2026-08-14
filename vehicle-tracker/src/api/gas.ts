@@ -1,6 +1,17 @@
 import type { GASResponse, VehicleData, TelemetryDataPoint, VehicleTracks } from '../types';
 
 const GAS_ENDPOINT = import.meta.env.VITE_GAS_ENDPOINT;
+const LEGACY_GAS_ENDPOINTS = (import.meta.env.VITE_LEGACY_GAS_ENDPOINTS || '')
+  .split(',')
+  .map((entry) => {
+    const separatorIndex = entry.indexOf('|');
+    if (separatorIndex < 1) return null;
+
+    const vehicleId = entry.slice(0, separatorIndex).trim();
+    const endpoint = entry.slice(separatorIndex + 1).trim();
+    return vehicleId && endpoint ? { vehicleId, endpoint } : null;
+  })
+  .filter((entry): entry is { vehicleId: string; endpoint: string } => entry !== null);
 
 if (!GAS_ENDPOINT) {
   console.warn('VITE_GAS_ENDPOINT not configured. Please set it in your .env file.');
@@ -40,12 +51,8 @@ function hasValidCoordinates(point: Pick<TelemetryDataPoint, 'latitude' | 'longi
     && !(latitude === 0 && longitude === 0);
 }
 
-async function requestGAS<T>(action: string, params: Record<string, string> = {}): Promise<T> {
-  if (!GAS_ENDPOINT) {
-    throw new GASApiError('GAS endpoint not configured');
-  }
-
-  const url = new URL(GAS_ENDPOINT);
+async function requestGAS<T>(endpoint: string, action: string, params: Record<string, string> = {}): Promise<T> {
+  const url = new URL(endpoint);
   url.searchParams.set('action', action);
   
   Object.entries(params).forEach(([key, value]) => {
@@ -87,8 +94,8 @@ async function requestGAS<T>(action: string, params: Record<string, string> = {}
   }
 }
 
-async function fetchGAS<T extends object>(action: string, params: Record<string, string> = {}): Promise<GASResponse<T>> {
-  const data = await requestGAS<GASResponse<T>>(action, params);
+async function fetchGAS<T extends object>(endpoint: string, action: string, params: Record<string, string> = {}): Promise<GASResponse<T>> {
+  const data = await requestGAS<GASResponse<T>>(endpoint, action, params);
 
   if (data.status === 'error') {
     throw new GASApiError(data.message || 'Unknown error from GAS API');
@@ -97,8 +104,8 @@ async function fetchGAS<T extends object>(action: string, params: Record<string,
   return data;
 }
 
-async function getLegacyVehicleTracks(): Promise<VehicleTracks> {
-  const legacyData = await requestGAS<LegacyTelemetryDataPoint[]>('getData');
+async function getLegacyVehicleData(endpoint: string, vehicleId: string): Promise<TelemetryDataPoint[]> {
+  const legacyData = await requestGAS<LegacyTelemetryDataPoint[]>(endpoint, 'getData');
 
   if (!Array.isArray(legacyData)) {
     throw new GASApiError('Legacy GAS API returned an unexpected data format');
@@ -112,7 +119,7 @@ async function getLegacyVehicleTracks(): Promise<VehicleTracks> {
   const data = legacyData
     .map((point): TelemetryDataPoint => ({
       timestamp: point.time || new Date().toISOString(),
-      vehicleId: 'DRONE_001',
+      vehicleId,
       latitude: toNumber(point.Lat),
       longitude: toNumber(point.Lng),
       waterTemperature: toNumber(point.wtmp ?? point.waterTemp),
@@ -123,12 +130,16 @@ async function getLegacyVehicleTracks(): Promise<VehicleTracks> {
     .filter(hasValidCoordinates)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-  return { DRONE_001: data };
+  return data;
 }
 
 export async function getAllVehicles(): Promise<VehicleTracks> {
+  if (!GAS_ENDPOINT) {
+    throw new GASApiError('GAS endpoint not configured');
+  }
+
   try {
-    const response = await fetchGAS<{ vehicles: VehicleData[] }>('getAllVehicles');
+    const response = await fetchGAS<{ vehicles: VehicleData[] }>(GAS_ENDPOINT, 'getAllVehicles');
 
     const tracks: VehicleTracks = {};
 
@@ -142,7 +153,31 @@ export async function getAllVehicles(): Promise<VehicleTracks> {
   } catch (error) {
     if (error instanceof GASApiError && error.responseBody?.trim() === 'No Data') {
       console.info('The configured GAS endpoint uses the legacy getData API. Applying compatibility mapping.');
-      return getLegacyVehicleTracks();
+
+      const configuredEndpoints = LEGACY_GAS_ENDPOINTS.length > 0
+        ? LEGACY_GAS_ENDPOINTS
+        : [{ vehicleId: 'DRONE_001', endpoint: GAS_ENDPOINT }];
+      const results = await Promise.allSettled(
+        configuredEndpoints.map(async ({ vehicleId, endpoint }) => ({
+          vehicleId,
+          data: await getLegacyVehicleData(endpoint, vehicleId),
+        })),
+      );
+      const tracks: VehicleTracks = {};
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          tracks[result.value.vehicleId] = result.value.data;
+        } else {
+          console.error('Failed to load a legacy vehicle endpoint:', result.reason);
+        }
+      });
+
+      if (Object.keys(tracks).length === 0) {
+        throw new GASApiError('All configured legacy GAS endpoints failed');
+      }
+
+      return tracks;
     }
 
     throw error;
@@ -151,14 +186,16 @@ export async function getAllVehicles(): Promise<VehicleTracks> {
 
 // These functions require the current multi-vehicle GAS contract.
 export async function getVehicle(vehicleId: string): Promise<TelemetryDataPoint[]> {
-  const response = await fetchGAS<{ data: TelemetryDataPoint[] }>('getVehicle', { vehicleId });
+  if (!GAS_ENDPOINT) throw new GASApiError('GAS endpoint not configured');
+  const response = await fetchGAS<{ data: TelemetryDataPoint[] }>(GAS_ENDPOINT, 'getVehicle', { vehicleId });
   return response.data || [];
 }
 
 export async function getVehicleList(): Promise<string[]> {
-  const response = await fetchGAS<{ 
+  if (!GAS_ENDPOINT) throw new GASApiError('GAS endpoint not configured');
+  const response = await fetchGAS<{
     vehicles: Array<{ vehicleId: string; dataCount: number }> 
-  }>('getVehicleList');
+  }>(GAS_ENDPOINT, 'getVehicleList');
   
   return response.vehicles?.map(v => v.vehicleId) || [];
 }

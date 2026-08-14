@@ -48,6 +48,7 @@ module.exports = (env, argv) => {
           MODE: isProduction ? 'production' : 'development',
           VITE_GMAPS_API_KEY: process.env.VITE_GMAPS_API_KEY,
           VITE_GAS_ENDPOINT: process.env.VITE_GAS_ENDPOINT,
+          VITE_LEGACY_GAS_ENDPOINTS: process.env.VITE_LEGACY_GAS_ENDPOINTS,
         }),
       }),
       ...(isProduction ? [new MiniCssExtractPlugin({

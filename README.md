@@ -39,6 +39,9 @@ VITE_GMAPS_API_KEY=your_google_maps_api_key_here
 
 # データ取得先のGoogle Apps Script URL（必須）
 VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url_here
+
+# 旧GASを車両ごとに使う場合（任意）
+VITE_LEGACY_GAS_ENDPOINTS=DRONE_001|first_gas_url,DRONE_002|second_gas_url
 ```
 
 ### 4. アプリケーションの起動
