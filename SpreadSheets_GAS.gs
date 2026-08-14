@@ -1,7 +1,20 @@
+const VEHICLE_HEADERS = [
+  "Timestamp",
+  "Vehicle ID",
+  "Latitude",
+  "Longitude",
+  "Altitude",
+  "GPS Satellites",
+  "Water Temperature",
+  "Air Pressure",
+  "Air Temperature",
+  "Humidity",
+];
+
 // WebAppのメインエントリーポイント（GET リクエスト処理）
 function doGet(e) {
   try {
-    const action = e.parameter.action;
+    const action = e && e.parameter ? e.parameter.action : null;
 
     switch (action) {
       case "getAllVehicles":
@@ -28,8 +41,18 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("POST body is required");
+    }
+
     // POSTデータを取得
     const data = JSON.parse(e.postData.contents);
+
+    // INGEST_TOKENが設定されている場合のみ書き込み認証を有効化
+    const expectedToken = PropertiesService.getScriptProperties().getProperty("INGEST_TOKEN");
+    if (expectedToken && data.ingest_token !== expectedToken) {
+      return createErrorResponse("Unauthorized");
+    }
 
     // スプレッドシートにデータを保存
     const result = saveToSpreadsheet(data);
@@ -68,6 +91,8 @@ function saveToSpreadsheet(data) {
     let sheet = spreadsheet.getSheetByName(sheetName);
     if (!sheet) {
       sheet = createNewSheet(spreadsheet, sheetName);
+    } else {
+      ensureSheetSchema(sheet);
     }
 
     // データを行に変換
@@ -81,6 +106,7 @@ function saveToSpreadsheet(data) {
       data.sensors.water_temperature,
       data.sensors.air_pressure,
       data.sensors.air_temperature,
+      data.sensors.humidity ?? "",
     ];
 
     // データを追加
@@ -105,37 +131,28 @@ function createNewSheet(spreadsheet, sheetName) {
   // 新しいシートを作成
   const sheet = spreadsheet.insertSheet(sheetName);
 
-  // ヘッダー行を設定
-  const headers = [
-    "Timestamp",
-    "Vehicle ID",
-    "Latitude",
-    "Longitude",
-    "Altitude",
-    "GPS Satellites",
-    "Water Temperature",
-    "Air Pressure",
-    "Air Temperature",
-  ];
+  ensureSheetSchema(sheet);
 
-  // ヘッダーを設定
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  Logger.log(`New sheet created: ${sheetName}`);
+
+  return sheet;
+}
+
+function ensureSheetSchema(sheet) {
+  // ヘッダー行を設定
+  sheet.getRange(1, 1, 1, VEHICLE_HEADERS.length).setValues([VEHICLE_HEADERS]);
 
   // ヘッダー行の書式設定
-  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  const headerRange = sheet.getRange(1, 1, 1, VEHICLE_HEADERS.length);
   headerRange.setBackground("#4285f4");
   headerRange.setFontColor("white");
   headerRange.setFontWeight("bold");
 
   // 列幅を自動調整
-  sheet.autoResizeColumns(1, headers.length);
+  sheet.autoResizeColumns(1, VEHICLE_HEADERS.length);
 
   // フリーズヘッダー
   sheet.setFrozenRows(1);
-
-  Logger.log(`New sheet created: ${sheetName}`);
-
-  return sheet;
 }
 
 // === WebApp API Functions ===
@@ -250,7 +267,7 @@ function getVehicleDataFromSheet(sheet) {
     }
 
     // データ範囲を取得（ヘッダー行を除く）
-    const dataRange = sheet.getRange(2, 1, lastRow - 1, 9); // 9列分のデータ
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, VEHICLE_HEADERS.length);
     const values = dataRange.getValues();
 
     const vehicleData = [];
@@ -269,6 +286,11 @@ function getVehicleDataFromSheet(sheet) {
           airPressure: parseFloat(row[7]) || 0,
           airTemperature: parseFloat(row[8]) || 0,
         };
+
+        const humidity = parseFloat(row[9]);
+        if (!isNaN(humidity)) {
+          dataPoint.humidity = humidity;
+        }
 
         vehicleData.push(dataPoint);
       }
@@ -358,6 +380,129 @@ function createErrorResponse(message) {
   );
 }
 
+// === Legacy data migration ===
+
+/**
+ * Script Propertiesに設定された旧GAS URLから、2台分の履歴を安全に移行します。
+ * 必須プロパティ: LEGACY_DRONE_001_URL, LEGACY_DRONE_002_URL
+ * 同じ車両ID・タイムスタンプの行は再実行時に追加しません。
+ */
+function migrateLegacyData() {
+  const properties = PropertiesService.getScriptProperties();
+  const sources = [
+    { vehicleId: "DRONE_001", url: properties.getProperty("LEGACY_DRONE_001_URL") },
+    { vehicleId: "DRONE_002", url: properties.getProperty("LEGACY_DRONE_002_URL") },
+  ];
+  const missingProperties = sources
+    .filter((source) => !source.url)
+    .map((source) => `LEGACY_${source.vehicleId}_URL`);
+
+  if (missingProperties.length > 0) {
+    throw new Error(`Missing Script Properties: ${missingProperties.join(", ")}`);
+  }
+
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const summary = sources.map((source) =>
+    migrateLegacySource(spreadsheet, source.vehicleId, source.url)
+  );
+
+  Logger.log("Migration summary: " + JSON.stringify(summary));
+  return summary;
+}
+
+function migrateLegacySource(spreadsheet, vehicleId, endpoint) {
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const response = UrlFetchApp.fetch(`${endpoint}${separator}action=getData`, {
+    muteHttpExceptions: true,
+  });
+
+  if (response.getResponseCode() !== 200) {
+    throw new Error(`${vehicleId}: legacy API returned HTTP ${response.getResponseCode()}`);
+  }
+
+  const legacyData = JSON.parse(response.getContentText());
+  if (!Array.isArray(legacyData)) {
+    throw new Error(`${vehicleId}: legacy API did not return an array`);
+  }
+
+  const sheetName = `Vehicle_${vehicleId}`;
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = createNewSheet(spreadsheet, sheetName);
+  } else {
+    ensureSheetSchema(sheet);
+  }
+
+  const existingTimestamps = new Set();
+  if (sheet.getLastRow() > 1) {
+    sheet
+      .getRange(2, 1, sheet.getLastRow() - 1, 1)
+      .getValues()
+      .forEach((row) => existingTimestamps.add(formatTimestamp(row[0])));
+  }
+
+  const rowsToAppend = [];
+  let skippedInvalid = 0;
+  let skippedDuplicate = 0;
+
+  legacyData.forEach((item) => {
+    const latitude = parseFloat(item.Lat);
+    const longitude = parseFloat(item.Lng);
+    const hasValidCoordinates =
+      isFinite(latitude) &&
+      isFinite(longitude) &&
+      latitude >= -90 &&
+      latitude <= 90 &&
+      longitude >= -180 &&
+      longitude <= 180 &&
+      !(latitude === 0 && longitude === 0);
+
+    if (!hasValidCoordinates) {
+      skippedInvalid++;
+      return;
+    }
+
+    const timestamp = formatTimestamp(item.time);
+    if (existingTimestamps.has(timestamp)) {
+      skippedDuplicate++;
+      return;
+    }
+
+    rowsToAppend.push([
+      timestamp,
+      vehicleId,
+      latitude,
+      longitude,
+      "",
+      "",
+      numberOrBlank(item.wtmp ?? item.waterTemp),
+      numberOrBlank(item.prs),
+      numberOrBlank(item.tmp),
+      numberOrBlank(item.hum),
+    ]);
+    existingTimestamps.add(timestamp);
+  });
+
+  if (rowsToAppend.length > 0) {
+    sheet
+      .getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, VEHICLE_HEADERS.length)
+      .setValues(rowsToAppend);
+  }
+
+  return {
+    vehicleId: vehicleId,
+    fetched: legacyData.length,
+    added: rowsToAppend.length,
+    skippedInvalid: skippedInvalid,
+    skippedDuplicate: skippedDuplicate,
+  };
+}
+
+function numberOrBlank(value) {
+  const parsed = parseFloat(value);
+  return isFinite(parsed) ? parsed : "";
+}
+
 // === Test Functions ===
 
 /**
@@ -377,6 +522,7 @@ function testFunction() {
       water_temperature: 18.5,
       air_pressure: 1013.25,
       air_temperature: 22.3,
+      humidity: 55.0,
     },
   };
 

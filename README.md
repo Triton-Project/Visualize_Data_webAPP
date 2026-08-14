@@ -190,6 +190,8 @@ Google Apps Script は以下のエンドポイントを提供する必要があ�
 
 ## 🔧 Google Apps Script 設定
 
+旧GASから複数ドローン用GASへ切り替える場合は、[GAS_MIGRATION.md](GAS_MIGRATION.md)を参照してください。
+
 データ提供用の Google Apps Script は以下のエンドポイントをサポートする必要があります：
 
 ### 必要な API エンドポイント
