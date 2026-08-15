@@ -107,3 +107,14 @@ VITE_GAS_ENDPOINT=your_google_apps_script_web_app_url
 ```
 
 Note: Despite using webpack, environment variables still use the `VITE_` prefix for consistency.
+
+## Data Format Differences
+
+**Important**: There's a schema mismatch between POST and GET data:
+- **POST to GAS**: Uses nested structure (`gps.latitude`, `sensors.water_temperature`)
+- **GET from GAS**: Returns flattened structure (`latitude`, `waterTemperature`)
+- The GAS backend handles the transformation between these formats
+
+When modifying data fields, update both:
+1. `TelemetryRow` interface (POST format) in `src/types/index.ts`
+2. `TelemetryDataPoint` interface (GET format) in `src/types/index.ts`
